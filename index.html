@@ -1219,7 +1219,7 @@ const chartDefaults = {
   color: '#8899bb',
 };
 
-Chart.register(ChartDataLabels);
+// chartjs-plugin-datalabels CDN 版本会自动注册，无需手动调用
 Chart.defaults.color = '#5c6680';
 Chart.defaults.font.family = "'DM Mono', 'Noto Sans SC', sans-serif";
 Chart.defaults.font.size = 12;
@@ -1360,5 +1360,4 @@ function initCharts() {
       fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#3b82f6'}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},
       plugins:{legend:{display:false},datalabels:{...dlLine,color:'#60a5fa'}},
-      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
-  })
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:
