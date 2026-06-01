@@ -1,1 +1,1345 @@
-<!-- Hong Kun Finance -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北京鸿坤进出口 · 财务管理系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root {
+  /* 性冷淡风 — 低饱和度，克制，呼吸感 */
+  --bg: #0c0d11;
+  --surface: #13151c;
+  --surface2: #191c26;
+  --surface3: #1f2330;
+  --border: rgba(255,255,255,0.05);
+  --border2: rgba(255,255,255,0.08);
+  --text-primary: #c9d0de;
+  --text-secondary: #5c6680;
+  --text-dim: #323850;
+  --accent-blue: #5c7fa3;
+  --accent-blue-light: #7da0c4;
+  --accent-green: #4d7a6a;
+  --accent-green-light: #6a9e8d;
+  --accent-amber: #8a7245;
+  --accent-red: #7a4f4f;
+  --accent-purple: #6b5a8a;
+  --accent-cyan: #3d7a8a;
+  --glow-blue: 0 0 24px rgba(92,127,163,0.15);
+  --glow-green: 0 0 24px rgba(77,122,106,0.15);
+  --radius: 10px;
+  --radius-lg: 14px;
+  --font: 'Noto Sans SC', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--font); background: var(--bg); color: var(--text-primary); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+/* ─── HEADER ─── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 200;
+}
+.header::after { display:none; }
+.logo {
+  display:flex; align-items:center; gap:10px;
+}
+.logo-icon {
+  width:32px; height:32px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; color:white;
+  flex-shrink:0;
+}
+.logo-text { font-size:16px; font-weight:600; color:var(--text-primary); letter-spacing:0.3px; }
+.logo-sub { font-size:12px; color:var(--text-secondary); margin-top:2px; font-weight:400; }
+.header-right { display:flex; align-items:center; gap:20px; }
+.update-tag {
+  font-size:11px; color:var(--text-dim);
+  background:var(--surface2); border:1px solid var(--border);
+  padding:4px 10px; border-radius:20px; font-family:var(--mono);
+}
+.live-dot {
+  display:flex; align-items:center; gap:6px; font-size:11px; color:var(--accent-green);
+}
+.live-dot::before {
+  content:'';
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent-green);
+  box-shadow:0 0 8px var(--accent-green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50% { opacity:0.4; }
+}
+
+/* ─── YEAR BAR ─── */
+.year-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; gap:2px;
+  padding: 0 28px;
+  flex-shrink:0;
+  height:44px;
+}
+.year-btn {
+  padding: 6px 22px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor:pointer;
+  font-size:14px; font-weight:500;
+  color:var(--text-secondary);
+  background:transparent;
+  transition:all 0.2s;
+  font-family:var(--font);
+  letter-spacing:0.5px;
+}
+.year-btn:hover { color:var(--text-primary); background:var(--surface2); }
+.year-btn.active {
+  color:var(--accent-blue-light);
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.3);
+}
+.year-divider { width:1px; height:20px; background:var(--border); margin:0 6px; }
+
+/* ─── NAV ─── */
+.nav {
+  background:var(--surface);
+  display:flex; gap:0;
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  flex-shrink:0;
+  height:44px;
+  align-items:stretch;
+}
+.nav button {
+  padding:0 22px;
+  border:none; background:none; cursor:pointer;
+  font-size:14px; font-weight:400;
+  color:var(--text-secondary);
+  border-bottom:2px solid transparent;
+  transition:all 0.2s;
+  font-family:var(--font);
+  display:flex; align-items:center; gap:6px;
+  white-space:nowrap;
+}
+.nav button .nav-icon { font-size:14px; }
+.nav button:hover { color:var(--text-primary); }
+.nav button.active { color:var(--accent-blue-light); border-bottom-color:var(--accent-blue); }
+
+/* ─── LAYOUT ─── */
+.year-content { display:none; }
+.year-content.active { display:flex; flex-direction:column; height:calc(100vh - 144px); }
+.page { display:none; flex:1; overflow-y:auto; padding:20px 28px; }
+.page.active { display:block; }
+
+/* Dashboard special layout */
+.page.active.dashboard-page {
+  display:flex; flex-direction:column;
+  overflow:hidden; padding:16px 28px;
+}
+.dashboard-page .kpi-row { flex-shrink:0; margin-bottom:14px; }
+.dashboard-page .charts-grid {
+  flex:1; min-height:0;
+  display:grid;
+  grid-template-columns: repeat(12,1fr);
+  grid-template-rows: 1fr 1fr;
+  gap:10px;
+  grid-template-areas:
+    "proj proj proj proj cash cash cash pcny pcny pcny pcny pcny"
+    "sup  sup  sup  sup  month month month month uprog uprog uprog uprog";
+}
+.dashboard-page .charts-grid > :nth-child(1) { grid-area:proj; }
+.dashboard-page .charts-grid > :nth-child(2) { grid-area:cash; }
+.dashboard-page .charts-grid > :nth-child(3) { grid-area:pcny; }
+.dashboard-page .charts-grid > :nth-child(4) { grid-area:sup; }
+.dashboard-page .charts-grid > :nth-child(5) { grid-area:month; }
+.dashboard-page .charts-grid > :nth-child(6) { grid-area:uprog; }
+.dashboard-page .chart-box {
+  display:flex; flex-direction:column; min-height:0; overflow:hidden;
+}
+.dashboard-page .chart-box .chart-wrap {
+  flex:1; min-height:0; position:relative; overflow:hidden;
+}
+.dashboard-page .chart-box canvas {
+  position:absolute; top:0; left:0; width:100%!important; height:100%!important;
+  max-height:none!important;
+}
+
+/* ─── KPI CARDS ─── */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr) 1.8fr; gap:12px; }
+.kpi-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px 18px;
+  position:relative; overflow:hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.kpi-card:hover { transform:translateY(-1px); }
+.kpi-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  background:var(--accent-color, var(--accent-blue));
+}
+.kpi-card.blue { --accent-color: var(--accent-blue); }
+.kpi-card.blue:hover { border-color:rgba(59,130,246,0.3); }
+.kpi-card.green { --accent-color: var(--accent-green); }
+.kpi-card.green:hover { border-color:rgba(16,185,129,0.3); }
+.kpi-card.amber { --accent-color: var(--accent-amber); }
+.kpi-card.amber:hover { border-color:rgba(245,158,11,0.3); }
+.kpi-card.red { --accent-color: var(--accent-red); }
+.kpi-card.red:hover { border-color:rgba(239,68,68,0.3); }
+.kpi-card.purple { --accent-color: var(--accent-purple); }
+.kpi-card.purple:hover { border-color:rgba(139,92,246,0.3); }
+
+.kpi-label { font-size:12px; color:var(--text-secondary); margin-bottom:10px; font-weight:400; letter-spacing:0.8px; text-transform:uppercase; }
+.kpi-value {
+  font-size:26px; font-weight:600;
+  color:var(--kpi-color, var(--text-primary));
+  font-family:var(--mono); letter-spacing:-0.5px;
+}
+.kpi-card.blue .kpi-value { color:var(--accent-blue-light); }
+.kpi-card.green .kpi-value { color:var(--accent-green-light); }
+.kpi-card.amber .kpi-value { color:var(--accent-amber); }
+.kpi-card.red .kpi-value { color:#f87171; }
+.kpi-card.purple .kpi-value { color:#a78bfa; }
+.kpi-sub { font-size:11px; color:var(--text-dim); margin-top:5px; }
+
+/* Hero KPI card */
+.kpi-card.hero {
+  background: var(--surface2);
+  border: 1px solid rgba(92,127,163,0.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.kpi-card.hero::before { background: var(--accent-blue); opacity:0.6; }
+.kpi-card.hero:hover { border-color:rgba(92,127,163,0.35); }
+.kpi-hero-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.25);
+  border-radius:20px; padding:2px 10px;
+  font-size:10px; font-weight:600; color:var(--accent-blue-light);
+  margin-bottom:8px; letter-spacing:0.5px;
+}
+.kpi-card.hero .kpi-value { font-size:34px; color:var(--text-primary); }
+.kpi-card.hero .kpi-sub { color:var(--text-dim); font-size:11px; margin-top:8px; line-height:1.6; }
+
+/* ─── CHART BOX ─── */
+.chart-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px 16px;
+  position:relative; overflow:hidden;
+}
+.chart-box::before {
+  content:'';
+  position:absolute; top:0; left:16px; right:16px; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+}
+.chart-box h4 {
+  font-size:13px; font-weight:400; color:var(--text-secondary);
+  margin-bottom:10px; letter-spacing:0.6px; text-transform:uppercase;
+  flex-shrink:0;
+}
+.chart-box canvas { max-height:240px; }
+
+/* ─── SECTION ─── */
+.section {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:20px;
+  margin-bottom:16px;
+}
+.section h3 {
+  font-size:14px; font-weight:700; color:var(--text-primary);
+  margin-bottom:16px; padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+}
+.section h3 .section-icon { font-size:16px; }
+
+/* ─── TAGS ─── */
+.tag {
+  font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600;
+  letter-spacing:0.5px; text-transform:uppercase;
+}
+.tag.usd { background:rgba(59,130,246,0.15); color:var(--accent-blue-light); border:1px solid rgba(59,130,246,0.2); }
+.tag.cny { background:rgba(16,185,129,0.12); color:var(--accent-green-light); border:1px solid rgba(16,185,129,0.2); }
+
+/* ─── TABLES ─── */
+.table-wrap { overflow-x:auto; border-radius:8px; border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; font-size:14px; }
+th {
+  background:var(--surface2); padding:11px 16px; text-align:left;
+  font-weight:500; color:var(--text-secondary); border-bottom:1px solid var(--border2);
+  white-space:nowrap; font-size:12px; letter-spacing:0.6px; text-transform:uppercase;
+}
+td { padding:11px 16px; border-bottom:1px solid var(--border); color:var(--text-primary); }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,0.025); }
+.project-row td { background:rgba(59,130,246,0.06); font-weight:600; color:var(--accent-blue-light); }
+.project-row:hover td { background:rgba(59,130,246,0.1); }
+.negative { color:#f87171; font-weight:600; }
+.positive { color:var(--accent-green-light); font-weight:600; }
+
+/* Status badges */
+.badge {
+  display:inline-flex; align-items:center; gap:3px;
+  padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600;
+  letter-spacing:0.3px;
+}
+.badge-done { background:rgba(16,185,129,0.15); color:var(--accent-green-light); border:1px solid rgba(16,185,129,0.2); }
+.badge-active { background:rgba(245,158,11,0.12); color:#fbbf24; border:1px solid rgba(245,158,11,0.2); }
+.badge-prepay { background:rgba(245,158,11,0.12); color:#fbbf24; }
+.badge-final { background:rgba(16,185,129,0.12); color:var(--accent-green-light); }
+.badge-freight { background:rgba(139,92,246,0.12); color:#a78bfa; }
+.badge-tax { background:rgba(239,68,68,0.1); color:#f87171; }
+
+/* ─── PROGRESS / FORECAST ─── */
+.forecast-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.progress-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.progress-label { width:90px; font-size:13px; color:var(--text-secondary); flex-shrink:0; }
+.progress-bar-wrap { flex:1; background:var(--surface3); border-radius:6px; height:8px; overflow:hidden; }
+.progress-bar { height:8px; border-radius:6px; transition:width 0.8s cubic-bezier(.4,0,.2,1); }
+.progress-val { font-size:12px; color:var(--text-primary); width:130px; text-align:right; flex-shrink:0; font-family:var(--mono); font-weight:500; }
+
+/* ─── COMPARE TABLE ─── */
+.compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.compare-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px;
+}
+.compare-card h4 { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:16px; }
+.compare-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 0; border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.compare-row:last-child { border-bottom:none; font-weight:700; }
+.compare-row span:first-child { color:var(--text-secondary); }
+
+/* ─── SEARCH ─── */
+.search-bar { margin-bottom:12px; display:flex; gap:8px; }
+.search-bar input {
+  flex:1; padding:8px 14px; background:var(--surface2); border:1px solid var(--border2);
+  border-radius:8px; font-size:13px; color:var(--text-primary);
+  outline:none; font-family:var(--font);
+  transition:border-color 0.2s;
+}
+.search-bar input::placeholder { color:var(--text-dim); }
+.search-bar input:focus { border-color:rgba(59,130,246,0.5); box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+
+/* ─── PROJECT FILTER TABS ─── */
+.proj-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.proj-tab {
+  padding:4px 12px; border:1px solid var(--border2); border-radius:20px;
+  font-size:11px; font-weight:600; cursor:pointer;
+  background:transparent; color:var(--text-secondary);
+  transition:all 0.15s; letter-spacing:0.3px;
+}
+.proj-tab:hover { border-color:rgba(59,130,246,0.4); color:var(--accent-blue-light); }
+.proj-tab.active { background:rgba(59,130,246,0.15); color:var(--accent-blue-light); border-color:rgba(59,130,246,0.35); }
+
+/* ─── PROJECT CARDS ─── */
+.proj-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin-bottom:20px; }
+.proj-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px;
+  cursor:pointer; transition:all 0.2s;
+  position:relative; overflow:hidden;
+}
+.proj-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+  transform:scaleX(0); transition:transform 0.2s;
+}
+.proj-card:hover { border-color:rgba(59,130,246,0.35); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+.proj-card:hover::before { transform:scaleX(1); }
+.proj-card.selected { border-color:rgba(59,130,246,0.5); background:rgba(59,130,246,0.05); }
+.proj-card.selected::before { transform:scaleX(1); }
+.proj-card .pno { font-size:10px; color:var(--text-dim); margin-bottom:4px; font-family:var(--mono); }
+.proj-card .pname { font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:6px; }
+.proj-card .pamount { font-size:13px; color:var(--accent-blue-light); font-weight:600; font-family:var(--mono); }
+.proj-card .pinfo { font-size:11px; color:var(--text-secondary); margin-top:3px; font-family:var(--mono); }
+.proj-card .pinfo.cost { color:#f87171; }
+.proj-card .pstatus { font-size:10px; margin-top:8px; }
+
+/* ─── PROJECT DETAIL ─── */
+.proj-detail { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:22px; }
+.proj-detail-header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);
+}
+.proj-detail-header h3 { font-size:17px; font-weight:700; color:var(--text-primary); }
+.proj-detail-header .proj-meta { font-size:11px; color:var(--text-dim); margin-top:4px; font-family:var(--mono); }
+.proj-stat { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+.proj-stat .lbl { font-size:10px; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
+.proj-stat .val { font-size:16px; font-weight:700; font-family:var(--mono); }
+.proj-back {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:8px; padding:7px 14px; cursor:pointer;
+  font-size:12px; color:var(--text-secondary); font-family:var(--font);
+  transition:all 0.15s;
+}
+.proj-back:hover { background:var(--surface3); color:var(--text-primary); }
+
+/* ─── COMPARE CHARTS GRID ─── */
+.charts-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+/* Give compare chart boxes a fixed height so maintainAspectRatio:false works */
+.charts-grid-2 .chart-box { position:relative; height:240px; display:flex; flex-direction:column; }
+.charts-grid-2 .chart-box h4 { flex-shrink:0; }
+.charts-grid-2 .chart-box canvas { flex:1; max-height:none!important; }
+
+/* ─── DASHBOARD CHART TITLE ─── */
+.dashboard-page .chart-box h4 {
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+@media (max-width:768px) {
+  .header { padding:12px 16px; }
+  .page { padding:14px 16px; }
+  .kpi-row { grid-template-columns:1fr 1fr; }
+  .forecast-grid, .compare-grid, .charts-grid-2 { grid-template-columns:1fr; }
+  .nav { padding:0 8px; overflow-x:auto; }
+  .year-bar { padding:0 16px; }
+}
+
+/* ─── ANIMATIONS ─── */
+.page.active { animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+/* ─── NUMERIC HIGHLIGHT ─── */
+.mono { font-family:var(--mono); }
+.highlight-blue { color:var(--accent-blue-light); }
+.highlight-green { color:var(--accent-green-light); }
+.highlight-red { color:#f87171; }
+.highlight-amber { color:var(--accent-amber); }
+
+/* ─── YEAR COMPARE PAGE ─── */
+/* Nav hidden for compare → only header(56) + yearbar(44) = 100px */
+#year-compare.active { height:calc(100vh - 100px) !important; }
+#year-compare > div { padding:20px 28px; height:100%; overflow-y:auto; }
+
+/* ─── TOTAL ROW ─── */
+.total-row td { background:rgba(59,130,246,0.08)!important; font-weight:700; color:var(--accent-blue-light)!important; font-family:var(--mono); }
+
+/* ─── SCROLLABLE PAGES have consistent max-height ─── */
+.page.active:not(.dashboard-page) { max-height:calc(100vh - 144px); overflow-y:auto; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">鸿</div>
+    <div>
+      <div class="logo-text">北京鸿坤进出口</div>
+      <div class="logo-sub">财务管理系统 · Import &amp; Export</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-dot">数据实时</div>
+    <div class="update-tag">最近更新 2026-05-31</div>
+  </div>
+</div>
+
+<!-- YEAR BAR -->
+<div class="year-bar">
+  <button class="year-btn active" onclick="switchYear('2025',this)">2025 全年</button>
+  <button class="year-btn" onclick="switchYear('2026',this)">2026 进行中</button>
+  <div class="year-divider"></div>
+  <button class="year-btn" onclick="switchYear('compare',this)">📊 年度对比</button>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="main-nav">
+  <button class="active" onclick="showPage(event)"><span class="nav-icon">◈</span> 总览看板</button>
+  <button onclick="showPage(event)"><span class="nav-icon">$</span> 美金收支</button>
+  <button onclick="showPage(event)"><span class="nav-icon">¥</span> 人民币付款</button>
+  <button onclick="showPage(event)"><span class="nav-icon">↗</span> 预测 &amp; 利润</button>
+  <button onclick="showPage(event)"><span class="nav-icon">⊞</span> 项目详情</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     2026
+════════════════════════════════════════ -->
+<div id="year-2026" class="year-content">
+
+  <!-- Dashboard -->
+  <div id="2026-page0" class="page active dashboard-page">
+    <div class="kpi-row">
+      <div class="kpi-card blue">
+        <div class="kpi-label">入账美金（已收）</div>
+        <div class="kpi-value">$366,166</div>
+        <div class="kpi-sub">5 个在建项目</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">换汇金额 ×6.8</div>
+        <div class="kpi-value">¥249万</div>
+        <div class="kpi-sub">¥2,489,927 人民币等值</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">采购成本</div>
+        <div class="kpi-value">¥211万</div>
+        <div class="kpi-sub">¥2,111,800 已付款合计</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">退税金额</div>
+        <div class="kpi-value">¥84,215</div>
+        <div class="kpi-sub">已申请退税</div>
+      </div>
+      <div class="kpi-card hero">
+        <div class="kpi-hero-badge">💰 现金余额</div>
+        <div class="kpi-value">¥462,342</div>
+        <div class="kpi-sub">换汇 ¥2,489,927 &minus; 成本 ¥2,111,800 + 退税 ¥84,215</div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-box"><h4>项目合同金额（USD）</h4><div class="chart-wrap"><canvas id="c26-proj"></canvas></div></div>
+      <div class="chart-box"><h4>现金流构成（换汇·成本·结余）</h4><div class="chart-wrap"><canvas id="c26-cash"></canvas></div></div>
+      <div class="chart-box"><h4>各项目采购成本占比</h4><div class="chart-wrap"><canvas id="c26-proj-cny"></canvas></div></div>
+      <div class="chart-box"><h4>供应商付款 TOP 8（CNY）</h4><div class="chart-wrap"><canvas id="c26-sup"></canvas></div></div>
+      <div class="chart-box"><h4>按月付款趋势（CNY）</h4><div class="chart-wrap"><canvas id="c26-month"></canvas></div></div>
+      <div class="chart-box"><h4>美金收款进度</h4><div class="chart-wrap"><canvas id="c26-usd-prog"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- USD -->
+  <div id="2026-page1" class="page">
+    <div class="section">
+      <h3><span class="section-icon">$</span> 美金收支明细 <span class="tag usd">USD</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>No.</th><th>项目编号</th><th>合同编号</th><th>合同金额 ($)</th><th>日期</th><th>收付款 ($)</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr class="project-row"><td>1</td><td class="mono">26-005</td><td class="mono">TK-002-0006</td><td class="mono">$70,884.23</td><td>—</td><td>—</td><td>合同总额 $15,128.78 + $55,755.45</td></tr>
+            <tr class="project-row"><td>2</td><td class="mono">26-008</td><td class="mono">23-088-0216</td><td class="mono">$125,490.00</td><td class="mono">2026-01-15</td><td class="positive mono">+$62,725.00</td><td><span class="badge badge-prepay">预付款</span></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td class="mono">2026-03-04</td><td class="negative mono">-$17,512.11</td><td>HKG26008-HY01 海运费</td></tr>
+            <tr><td></td><td></td><td></td><td></td><td class="mono">2026-03-06</td><td class="negative mono">-$5,365.93</td><td><span class="badge badge-tax">目的港税费</span></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td class="mono">2026-03-19</td><td class="negative mono">-$7,134.04</td><td><span class="badge badge-tax">目的港税费</span></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td class="mono">2026-04-01</td><td class="negative mono">-$825.00</td><td>Detention</td></tr>
+            <tr><td></td><td></td><td></td><td></td><td class="mono">2026-04-08</td><td class="positive mono">+$62,725.00</td><td><span class="badge badge-final">尾款</span></td></tr>
+            <tr class="project-row"><td>3</td><td class="mono">26-015</td><td class="mono">EQ-005-0240</td><td class="mono">$62,042.89</td><td class="mono">2026-04-14</td><td class="positive mono">+$62,022.89</td><td>—</td></tr>
+            <tr class="project-row"><td>4</td><td class="mono">26-016</td><td class="mono">EQ-001-0262 / CO1–CO3</td><td class="mono">$102,848.79</td><td class="mono">2026-05-18</td><td class="positive mono">+$86,946.07</td><td>—</td></tr>
+            <tr class="project-row"><td>5</td><td class="mono">26-024</td><td class="mono">22-067-0619</td><td class="mono">$253,839.26</td><td class="mono">2026-05-28</td><td class="positive mono">+$122,583.82</td><td>—</td></tr>
+            <tr style="background:rgba(59,130,246,0.12);font-weight:700"><td colspan="3" class="highlight-blue">合计</td><td class="mono highlight-blue">$615,105.17</td><td></td><td class="mono positive">$366,165.70</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CNY -->
+  <div id="2026-page2" class="page">
+    <div class="section">
+      <h3><span class="section-icon">¥</span> 人民币付款明细 <span class="tag cny">CNY</span></h3>
+      <div class="proj-tabs" id="tabs26"></div>
+      <div class="search-bar"><input type="text" id="search26" placeholder="搜索供应商 / 品名 / 编号…" oninput="filterCnyTable('26',this.value)"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>项目</th><th>供应商</th><th>品名</th><th>合同金额 (¥)</th><th>付款日期</th><th>付款金额 (¥)</th><th>退税 (¥)</th></tr></thead>
+          <tbody id="cny26"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forecast -->
+  <div id="2026-page3" class="page">
+    <div class="forecast-grid">
+      <div class="section">
+        <h3><span class="section-icon">💰</span> 现金流（已收）</h3>
+        <div class="progress-row"><div class="progress-label">入账美金</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:63%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-cyan))"></div></div><div class="progress-val">$366,166</div></div>
+        <div class="progress-row"><div class="progress-label">换汇×6.8</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:63%;background:linear-gradient(90deg,var(--accent-blue),#3b82f6aa)"></div></div><div class="progress-val">¥2,489,927</div></div>
+        <div class="progress-row"><div class="progress-label">采购成本</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:100%;background:linear-gradient(90deg,var(--accent-red),#f87171aa)"></div></div><div class="progress-val">¥2,111,800</div></div>
+        <div class="progress-row"><div class="progress-label">退税金额</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:4%;background:var(--accent-green)"></div></div><div class="progress-val">¥84,215</div></div>
+        <div class="progress-row" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+          <div class="progress-label" style="font-weight:700;color:var(--text-primary)">现金余额</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:26%;background:linear-gradient(90deg,var(--accent-purple),#a78bfa)"></div></div>
+          <div class="progress-val" style="font-weight:700;color:#a78bfa">¥462,342</div>
+        </div>
+      </div>
+      <div class="section">
+        <h3><span class="section-icon">↗</span> 全年预测</h3>
+        <div class="progress-row"><div class="progress-label">美金总额</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:100%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-cyan))"></div></div><div class="progress-val">$584,268</div></div>
+        <div class="progress-row"><div class="progress-label">换汇×6.8</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:100%;background:var(--accent-blue)"></div></div><div class="progress-val">¥3,973,023</div></div>
+        <div class="progress-row"><div class="progress-label">采购成本</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:74%;background:var(--accent-red)"></div></div><div class="progress-val">¥2,939,399</div></div>
+        <div class="progress-row"><div class="progress-label">退税金额</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:9%;background:var(--accent-green)"></div></div><div class="progress-val">¥338,161</div></div>
+        <div class="progress-row" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+          <div class="progress-label" style="font-weight:700;color:var(--accent-green-light)">预测毛利</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:35%;background:linear-gradient(90deg,var(--accent-green),var(--accent-green-light))"></div></div>
+          <div class="progress-val" style="font-weight:700;color:var(--accent-green-light)">¥1,371,785</div>
+        </div>
+      </div>
+    </div>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi-card blue"><div class="kpi-label">收款进度</div><div class="kpi-value">62.7%</div><div class="kpi-sub">$366,166 / $584,268</div></div>
+      <div class="kpi-card green"><div class="kpi-label">预测毛利率</div><div class="kpi-value">27.0%</div><div class="kpi-sub">预测利润 / 换汇金额</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">预测退税</div><div class="kpi-value">¥338,161</div><div class="kpi-sub">全年预测退税总额</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">待收美金</div><div class="kpi-value">$218,102</div><div class="kpi-sub">$584,268 - $366,166</div></div>
+    </div>
+  </div>
+
+  <!-- Projects -->
+  <div id="2026-page4" class="page">
+    <div id="2026-proj-list"></div>
+    <div id="2026-proj-detail" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     2025
+════════════════════════════════════════ -->
+<div id="year-2025" class="year-content active">
+
+  <!-- Dashboard -->
+  <div id="2025-page0" class="page active dashboard-page">
+    <div class="kpi-row">
+      <div class="kpi-card blue">
+        <div class="kpi-label">入账美金（已收）</div>
+        <div class="kpi-value">$1,896,038</div>
+        <div class="kpi-sub">15 个项目全年</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">换汇金额 ×7.0</div>
+        <div class="kpi-value">¥1,330万</div>
+        <div class="kpi-sub">¥13,296,777 人民币等值</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">采购成本</div>
+        <div class="kpi-value">¥951万</div>
+        <div class="kpi-sub">¥9,509,325 已付款合计</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">退税金额</div>
+        <div class="kpi-value">¥1,093,993</div>
+        <div class="kpi-sub">全年退税已收</div>
+      </div>
+      <div class="kpi-card hero">
+        <div class="kpi-hero-badge">🏆 年度结余</div>
+        <div class="kpi-value">¥4,881,445</div>
+        <div class="kpi-sub">换汇 ¥13,296,777 &minus; 成本 ¥9,509,325 + 退税 ¥1,093,993</div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-box"><h4>项目合同金额（USD）</h4><div class="chart-wrap"><canvas id="c25-proj"></canvas></div></div>
+      <div class="chart-box"><h4>现金流构成（换汇·成本·结余）</h4><div class="chart-wrap"><canvas id="c25-cash"></canvas></div></div>
+      <div class="chart-box"><h4>各项目采购成本占比</h4><div class="chart-wrap"><canvas id="c25-proj-cny"></canvas></div></div>
+      <div class="chart-box"><h4>供应商付款 TOP 8（CNY）</h4><div class="chart-wrap"><canvas id="c25-sup"></canvas></div></div>
+      <div class="chart-box"><h4>按月付款趋势（CNY）</h4><div class="chart-wrap"><canvas id="c25-month"></canvas></div></div>
+      <div class="chart-box"><h4>美金收款进度</h4><div class="chart-wrap"><canvas id="c25-usd-prog"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- USD -->
+  <div id="2025-page1" class="page">
+    <div class="section">
+      <h3><span class="section-icon">$</span> 美金收支明细 <span class="tag usd">USD</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>No.</th><th>项目编号</th><th>合同编号</th><th>合同金额 ($)</th><th>状态</th><th>已收 ($)</th><th>备注</th></tr></thead>
+          <tbody id="usd25"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CNY -->
+  <div id="2025-page2" class="page">
+    <div class="section">
+      <h3><span class="section-icon">¥</span> 人民币付款明细 <span class="tag cny">CNY</span></h3>
+      <div class="proj-tabs" id="tabs25"></div>
+      <div class="search-bar"><input type="text" id="search25" placeholder="搜索供应商 / 品名 / 编号…" oninput="filterCnyTable('25',this.value)"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>项目</th><th>供应商</th><th>品名</th><th>合同金额 (¥)</th><th>付款日期</th><th>付款金额 (¥)</th><th>退税 (¥)</th></tr></thead>
+          <tbody id="cny25"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forecast -->
+  <div id="2025-page3" class="page">
+    <div class="forecast-grid">
+      <div class="section">
+        <h3><span class="section-icon">💰</span> 现金流（全年汇总）</h3>
+        <div class="progress-row"><div class="progress-label">美金已收</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:99.8%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-cyan))"></div></div><div class="progress-val">$1,896,038</div></div>
+        <div class="progress-row"><div class="progress-label">换汇×7.0</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:100%;background:var(--accent-blue)"></div></div><div class="progress-val">¥13,296,777</div></div>
+        <div class="progress-row"><div class="progress-label">采购成本</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:71.5%;background:var(--accent-red)"></div></div><div class="progress-val">¥9,509,325</div></div>
+        <div class="progress-row"><div class="progress-label">退税金额</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:8.2%;background:var(--accent-green)"></div></div><div class="progress-val">¥1,093,993</div></div>
+        <div class="progress-row" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+          <div class="progress-label" style="font-weight:700;color:var(--accent-green-light)">年度结余</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:36.7%;background:linear-gradient(90deg,var(--accent-green),var(--accent-green-light))"></div></div>
+          <div class="progress-val" style="font-weight:700;color:var(--accent-green-light)">¥4,881,445</div>
+        </div>
+      </div>
+      <div class="section">
+        <h3><span class="section-icon">📊</span> 关键指标</h3>
+        <div class="compare-row"><span>美金未收</span><span class="negative mono">$3,501</span></div>
+        <div class="compare-row"><span>总外汇金额</span><span class="mono highlight-blue">$1,899,540</span></div>
+        <div class="compare-row"><span>项目数量</span><span class="mono">15</span></div>
+        <div class="compare-row"><span>已完结项目</span><span class="positive mono">10</span></div>
+        <div class="compare-row"><span>毛利率</span><span class="positive mono">36.7%</span></div>
+        <div class="compare-row"><span>退税率</span><span class="positive mono">11.5%</span></div>
+      </div>
+    </div>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi-card blue"><div class="kpi-label">美金收款率</div><div class="kpi-value">99.8%</div><div class="kpi-sub">$1,896,038 / $1,899,540</div></div>
+      <div class="kpi-card green"><div class="kpi-label">毛利率</div><div class="kpi-value">36.7%</div><div class="kpi-sub">¥4,881,445 / ¥13,296,777</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">退税金额</div><div class="kpi-value">¥1,093,993</div><div class="kpi-sub">全年退税合计</div></div>
+      <div class="kpi-card purple"><div class="kpi-label">项目总数</div><div class="kpi-value">15</div><div class="kpi-sub">10 完结 · 5 进行中</div></div>
+    </div>
+  </div>
+
+  <!-- Projects -->
+  <div id="2025-page4" class="page">
+    <div id="2025-proj-list"></div>
+    <div id="2025-proj-detail" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     YEAR COMPARE
+════════════════════════════════════════ -->
+<div id="year-compare" class="year-content">
+  <div>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>📅 2025 全年汇总</h4>
+        <div class="compare-row"><span>入账美金</span><span class="mono highlight-blue">$1,896,038</span></div>
+        <div class="compare-row"><span>换汇汇率</span><span class="mono">×7.0</span></div>
+        <div class="compare-row"><span>换汇金额</span><span class="mono">¥13,296,777</span></div>
+        <div class="compare-row"><span>采购成本</span><span class="negative mono">¥9,509,325</span></div>
+        <div class="compare-row"><span>退税金额</span><span class="positive mono">¥1,093,993</span></div>
+        <div class="compare-row"><span>项目数量</span><span class="mono">15 个</span></div>
+        <div class="compare-row"><span>年度结余</span><span class="positive mono">¥4,881,445</span></div>
+      </div>
+      <div class="compare-card">
+        <h4>📅 2026 进度（截至5月）</h4>
+        <div class="compare-row"><span>入账美金</span><span class="mono highlight-blue">$366,166</span></div>
+        <div class="compare-row"><span>换汇汇率</span><span class="mono">×6.8</span></div>
+        <div class="compare-row"><span>换汇金额</span><span class="mono">¥2,489,927</span></div>
+        <div class="compare-row"><span>采购成本</span><span class="negative mono">¥2,111,800</span></div>
+        <div class="compare-row"><span>退税金额</span><span class="positive mono">¥84,215</span></div>
+        <div class="compare-row"><span>项目数量</span><span class="mono">5 个</span></div>
+        <div class="compare-row"><span>现金余额</span><span class="positive mono">¥462,342</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <h3><span class="section-icon">📊</span> 两年对比图表</h3>
+      <div class="charts-grid-2">
+        <div class="chart-box"><h4>美金收入对比</h4><div style="flex:1;position:relative;min-height:0"><canvas id="cmp-usd" style="position:absolute;inset:0;width:100%!important;height:100%!important"></canvas></div></div>
+        <div class="chart-box"><h4>毛利率对比</h4><div style="flex:1;position:relative;min-height:0"><canvas id="cmp-margin" style="position:absolute;inset:0;width:100%!important;height:100%!important"></canvas></div></div>
+        <div class="chart-box"><h4>采购成本 vs 换汇收入（¥）</h4><div style="flex:1;position:relative;min-height:0"><canvas id="cmp-cost" style="position:absolute;inset:0;width:100%!important;height:100%!important"></canvas></div></div>
+        <div class="chart-box"><h4>退税金额对比</h4><div style="flex:1;position:relative;min-height:0"><canvas id="cmp-tax" style="position:absolute;inset:0;width:100%!important;height:100%!important"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────
+const cny26Data = [
+  { id:'HKG26005-NM01', supplier:'河北威瑟特雕塑工程有限公司', item:'灯具', contract:34146.0, date:'2026-03-10', paid:34146.0, tax:null },
+  { id:'HKG26005-NM02', supplier:'青岛乐品汇木业有限公司', item:'儿童座椅', contract:2566.8, date:'2026-03-10', paid:2566.8, tax:295.3 },
+  { id:'HKG26005-NM03', supplier:'佛山市高明宝神家具有限公司', item:'餐厅家具', contract:204970.0, date:'2026-03-19', paid:102485.0, tax:null },
+  { id:'HKG26005-NM04', supplier:'深圳市奥文手袋有限公司', item:'手提包（打样）', contract:650.0, date:'2026-03-17', paid:650.0, tax:0 },
+  { id:'HKG26005-NM05', supplier:'和顺意（青岛）机械科技有限公司', item:'台面角钢', contract:5414.98, date:'2026-04-10', paid:5414.98, tax:622.96 },
+  { id:'HKG26005-NM06', supplier:'河北威瑟特雕塑工程有限公司', item:'五金架', contract:96654.0, date:'2026-05-21', paid:28996.0, tax:null },
+  { id:'HKG26008-NM001', supplier:'宁津县炘鲁木业有限公司', item:'落叶松LVL踏板', contract:405964.0, date:'2026-01-15', paid:405964.0, tax:46703.82 },
+  { id:'HKG26008-GZ02', supplier:'青岛骏川国际物流有限公司', item:'港杂费', contract:9925.12, date:'2026-03-05', paid:9925.12, tax:0 },
+  { id:'N/A-陈', supplier:'陈垫付', item:'落箱费', contract:2400.0, date:'2026-02-07', paid:2400.0, tax:0 },
+  { id:'N/A-韦', supplier:'韦垫付', item:'落箱费', contract:1200.0, date:'2026-02-07', paid:2400.0, tax:0 },
+  { id:'HKG26008-LY03', supplier:'青岛汇诚达', item:'拖车费', contract:19640.0, date:'2026-02-10', paid:19640.0, tax:0 },
+  { id:'HKG26025-NM01', supplier:'苏州康朋斯机电有限公司', item:'绞盘', contract:6200.0, date:'2026-03-10', paid:6200.0, tax:713.27 },
+  { id:'HKG26025-NM02', supplier:'苏州拓恒建筑科技有限公司', item:'倒角条', contract:20615.0, date:'2026-03-19', paid:20615.0, tax:null },
+  { id:'HKG26025-NM03', supplier:'山东埃尔蒙工业设备有限公司', item:'雾炮', contract:233720.0, date:'2026-03-19', paid:233720.0, tax:26888.14 },
+  { id:'HKG26025-NM04', supplier:'呲铁机械有限公司', item:'多功能机床', contract:44478.0, date:'2026-03-19', paid:44478.0, tax:5116.94 },
+  { id:'HKG26026-NM01', supplier:'漳州市杰龙机电有限公司', item:'电机', contract:3180.0, date:'2026-03-10', paid:3180.0, tax:365.84 },
+  { id:'HKG26026-NM02', supplier:'青岛兴隆仓贸易有限公司', item:'钢筋帽', contract:30500.0, date:'2026-03-19', paid:30500.0, tax:3508.85 },
+  { id:'HKG26016-NM03', supplier:'上海君邦化工新材料有限公司', item:'天沟密封胶', contract:3416.0, date:'2026-04-15', paid:3416.0, tax:null },
+  { id:'HKG26016-NM04', supplier:'海盐杰特五金有限公司', item:'紧固件', contract:18446.0, date:'2026-04-15', paid:18446.0, tax:null },
+  { id:'HKG26016-NM05', supplier:'和顺意（青岛）机械科技有限公司', item:'不锈钢天沟', contract:385976.0, date:'2026-04-17', paid:385976.0, tax:null },
+  { id:'HKG26016-NM06', supplier:'河南中鑫科机械制造有限公司', item:'筛分机', contract:103155.0, date:'2026-05-13', paid:30946.5, tax:null },
+  { id:'HKG26024-NM01', supplier:'中山科佰实电器有限公司', item:'带灯风扇', contract:145525.0, date:'2026-04-23', paid:145525.0, tax:null },
+  { id:'HKG26024-NM02', supplier:'绍兴市馨澜防治有限公司', item:'窗帘', contract:322875.0, date:'2026-04-23', paid:322875.0, tax:null },
+  { id:'HKG26024-NM03', supplier:'佛山市高明宝神家具有限公司', item:'家具', contract:837782.0, date:'2026-05-12', paid:251334.6, tax:null },
+];
+
+const cny25Data = [
+  { id:'1.1', supplier:'厦门迈勒滚塑有限公司', item:'水马', contract:15616.6, date:'2024-12-11', paid:15616.6, tax:1796.6 },
+  { id:'1.2', supplier:'洛阳德平科技股份有限公司', item:'吊篮', contract:63390, date:'2025-02-13', paid:63390, tax:7292.66 },
+  { id:'1.3', supplier:'咸宁市天悦金属制品有限公司', item:'托辊支架', contract:70500, date:'2025-02-13', paid:70500, tax:8110.62 },
+  { id:'2.1', supplier:'济南森嘉机械有限公司', item:'升降作业平台', contract:29200, date:'2024-12-17', paid:29200, tax:3359.29 },
+  { id:'2.2', supplier:'安树（浙江）工业科技有限公司', item:'安全用品', contract:110170, date:'2024-11-17', paid:110170, tax:12674.43 },
+  { id:'2.3', supplier:'海盐杰特五金有限公司', item:'五金用品', contract:80130, date:'2024-12-17', paid:80130, tax:9218.49 },
+  { id:'3.1', supplier:'山东三跃机械科技有限公司', item:'拖车', contract:59400, date:'2024-11-18', paid:59400, tax:6832.2 },
+  { id:'3.2', supplier:'唐山玉诚机电设备有限公司', item:'污水泵', contract:23340, date:'2025-01-08', paid:23340, tax:2684.52 },
+  { id:'3.3', supplier:'北京汉海明通物流', item:'物流', contract:8100, date:'2025-03-12', paid:8100, tax:0 },
+  { id:'5.1', supplier:'芜湖市恒晟液压机械有限公司', item:'平板拖车', contract:185000, date:'2025-03-06', paid:185000, tax:21286.85 },
+  { id:'5.2', supplier:'山东星马汽车集团股份有限公司', item:'搅拌车', contract:369000, date:'2025-04-16', paid:369000, tax:42453.58 },
+  { id:'5.3', supplier:'重庆弗曼工程机械有限公司', item:'混凝土泵车', contract:855000, date:'2025-04-29', paid:855000, tax:98362.12 },
+  { id:'5.4', supplier:'山东星马汽车集团股份有限公司', item:'搅拌车', contract:378000, date:'2025-05-14', paid:378000, tax:43488.85 },
+  { id:'5.5', supplier:'山东三跃机械科技有限公司', item:'拖车', contract:237600, date:'2025-05-21', paid:237600, tax:27328.8 },
+  { id:'6.1', supplier:'青岛盛润佳索具有限公司', item:'吊装锁具', contract:34680, date:'2025-04-14', paid:34680, tax:3989.29 },
+  { id:'6.2', supplier:'山东奔马工程机械有限公司', item:'压路机', contract:132000, date:'2025-04-22', paid:132000, tax:15185.03 },
+  { id:'6.3', supplier:'无锡市旭建机械设备有限公司', item:'振动夯机', contract:14400, date:'2025-04-24', paid:14400, tax:1656.57 },
+  { id:'6.4', supplier:'山东奔马工程机械有限公司', item:'液压破碎锤', contract:7900, date:'2025-04-24', paid:7900, tax:908.99 },
+  { id:'7.1', supplier:'威海市立工程机械有限公司', item:'挖掘机', contract:266400, date:'2025-04-30', paid:266400, tax:30648.78 },
+  { id:'7.2', supplier:'河北冀路机械制造有限公司', item:'平地机', contract:280000, date:'2025-05-09', paid:280000, tax:32210.98 },
+  { id:'7.3', supplier:'山东奔马工程机械有限公司', item:'压路机', contract:198000, date:'2025-05-29', paid:198000, tax:22777.55 },
+  { id:'7.4', supplier:'中机国能电力工程有限公司', item:'发电机', contract:62000, date:'2025-05-07', paid:62000, tax:7131.04 },
+  { id:'7.5', supplier:'河北冀路机械制造有限公司', item:'装载机', contract:165000, date:'2025-06-04', paid:165000, tax:18986.84 },
+  { id:'7.6', supplier:'青岛盛润佳索具有限公司', item:'吊装锁具', contract:38500, date:'2025-06-05', paid:38500, tax:4429.67 },
+  { id:'8.1', supplier:'日照市东港区恒泰建材有限公司', item:'型材', contract:20550, date:'2025-05-12', paid:20550, tax:2363.7 },
+  { id:'8.2', supplier:'烟台信兴工业有限公司', item:'切割机', contract:169540, date:'2025-05-14', paid:169540, tax:19498.38 },
+  { id:'10.1', supplier:'青岛骏川国际物流有限公司', item:'港杂费', contract:14500, date:'2025-06-17', paid:14500, tax:0 },
+  { id:'10.2', supplier:'青岛骏川国际物流有限公司', item:'港杂费', contract:5800, date:'2025-07-15', paid:5800, tax:0 },
+  { id:'10.3', supplier:'青岛骏川国际物流有限公司', item:'港杂费', contract:19400, date:'2025-09-12', paid:19400, tax:0 },
+  { id:'10.4', supplier:'青岛骏川国际物流有限公司', item:'港杂费', contract:6200, date:'2025-10-22', paid:6200, tax:0 },
+  { id:'11.1', supplier:'福建捷思金属科技发展有限公司', item:'天沟', contract:128390, date:'2025-06-25', paid:128390, tax:14771.09 },
+  { id:'11.2', supplier:'福建捷思金属科技发展有限公司', item:'天沟', contract:161064, date:'2025-07-21', paid:161064, tax:18530.53 },
+  { id:'12.1', supplier:'宁津县炘鲁木业有限公司', item:'落叶松LVL踏板', contract:344808, date:'2025-08-01', paid:344808, tax:39681.32 },
+  { id:'12.2', supplier:'宁津县炘鲁木业有限公司', item:'落叶松LVL踏板', contract:97880, date:'2025-09-19', paid:97880, tax:11258.72 },
+  { id:'12.3', supplier:'宁津县炘鲁木业有限公司', item:'落叶松LVL踏板', contract:101448, date:'2025-10-24', paid:101448, tax:11670.12 },
+  { id:'13.1', supplier:'苏州康朋斯机电有限公司', item:'绞盘', contract:21700, date:'2025-09-11', paid:21700, tax:2496.03 },
+  { id:'13.2', supplier:'山东埃尔蒙工业设备有限公司', item:'雾炮', contract:144640, date:'2025-09-11', paid:144640, tax:16640.25 },
+  { id:'13.3', supplier:'呲铁机械有限公司', item:'多功能机床', contract:48888, date:'2025-11-21', paid:48888, tax:5626.68 },
+  { id:'13.4', supplier:'黄骅市万方五金塑料制品有限公司', item:'混凝土方桩', contract:78300, date:'2025-12-03', paid:78300, tax:9007.96 },
+  { id:'14.1', supplier:'山东路得威工程机械制造有限公司', item:'压路机配件', contract:15208, date:'2025-07-16', paid:15208, tax:1749.59 },
+  { id:'14.2', supplier:'青岛盛润佳索具有限公司', item:'吊装锁具', contract:12730, date:'2025-07-28', paid:12730, tax:1464.51 },
+  { id:'14.3', supplier:'山东三跃机械科技有限公司', item:'拖车', contract:74400, date:'2025-08-06', paid:74400, tax:8559.29 },
+  { id:'14.4', supplier:'洛阳信成精密机械有限公司', item:'气动打标机', contract:6800, date:'2025-06-08', paid:6800, tax:782.9 },
+  { id:'14.5', supplier:'北京新亚洲大力机械有限公司', item:'管道清理机', contract:7040, date:'2025-08-11', paid:7040, tax:809.91 },
+  { id:'14.6', supplier:'山东奔马工程机械有限公司', item:'压路机', contract:79200, date:'2025-08-27', paid:79200, tax:9111.5 },
+  { id:'14.7', supplier:'宁波市森睿环保科技有限公司', item:'塑料移动废水箱', contract:57920, date:'2025-09-15', paid:57920, tax:6665.66 },
+  { id:'14.8', supplier:'山东奔马工程机械有限公司', item:'镇流器', contract:3100, date:'2025-09-18', paid:3100, tax:356.64 },
+  { id:'14.9', supplier:'海盐杰特五金有限公司', item:'五金螺丝制品', contract:288370, date:'2025-10-10', paid:288370, tax:33175.32 },
+  { id:'14.10', supplier:'安树（浙江）工业科技有限公司', item:'安全用品', contract:258515, date:'2025-10-10', paid:258515, tax:29740.67 },
+  { id:'14.11', supplier:'佛山市鑫澳达塑料五金制品有限公司', item:'办公室座椅', contract:8165, date:'2025-10-16', paid:8165, tax:939.34 },
+  { id:'14.12', supplier:'临沂鑫瑞拜尔进出口有限公司', item:'防火石膏板', contract:17496, date:'2025-11-20', paid:17496, tax:1393.49 },
+  { id:'14.13', supplier:'长葛市旭莱德建筑机械有限公司', item:'钢筋切割机', contract:16753, date:'2025-11-04', paid:16753, tax:1927.33 },
+  { id:'14.14', supplier:'山东乔森激光科技有限公司', item:'激光清洗机', contract:23200, date:'2025-11-28', paid:23200, tax:2669.03 },
+  { id:'15.1', supplier:'中山市镈浤照明科技有限公司', item:'柱灯', contract:6944, date:'2025-08-14', paid:6944, tax:798.87 },
+  { id:'15.2', supplier:'和顺意（青岛）机械科技有限公司', item:'折弯件', contract:13980, date:'2025-08-21', paid:13980, tax:1608.32 },
+  { id:'15.3', supplier:'兴轮绳缆有限公司', item:'麻绳', contract:56944, date:'2025-08-15', paid:56944, tax:6551.08 },
+  { id:'15.4', supplier:'佛山市南海美光照明有限公司', item:'镜灯', contract:6170, date:'2025-08-18', paid:6170, tax:709.82 },
+  { id:'15.5', supplier:'莎丽科技股份有限公司', item:'滚轮', contract:1085, date:'2025-08-18', paid:1085, tax:0 },
+  { id:'15.6', supplier:'安吉县灵芝瞩目木艺厂', item:'竹片', contract:20350, date:'2025-08-21', paid:20350, tax:2341.15 },
+  { id:'15.7', supplier:'佛山市三水航凯家具有限公司', item:'家具', contract:61985.18, date:'2025-09-05', paid:62785.18, tax:7131.04 },
+  { id:'15.8', supplier:'刘晓琳报销', item:'不锈钢挂钩', contract:1324.98, date:'2025-10-13', paid:1324.98, tax:null },
+  { id:'15.9', supplier:'石家庄罗米文化发展有限公司', item:'垃圾桶', contract:24600, date:'2025-10-14', paid:24600, tax:2830.09 },
+  { id:'15.10', supplier:'莎丽科技股份有限公司', item:'五金配件', contract:690, date:'2025-10-31', paid:690, tax:null },
+  { id:'15.11', supplier:'石家庄罗米文化发展有限公司', item:'垃圾桶', contract:25695, date:'2025-11-04', paid:25695, tax:2956.06 },
+  { id:'15.12', supplier:'石家庄罗米文化发展有限公司', item:'不锈钢立柱', contract:3130, date:'2025-12-12', paid:3130, tax:360.09 },
+  { id:'15.13', supplier:'天津开发区陆成工贸有限公司', item:'防雨布', contract:12144, date:'2025-12-15', paid:12144, tax:1397.1 },
+  { id:'15.14', supplier:'石家庄罗米文化发展有限公司', item:'垃圾桶', contract:16830, date:'2026-01-04', paid:16830, tax:1936.19 },
+  { id:'15.15', supplier:'福建捷思金属科技发展有限公司', item:'天沟和落水管', contract:128386.82, date:'2026-01-13', paid:128386.82, tax:14770.17 },
+  { id:'15.16', supplier:'天津开发区陆成工贸有限公司', item:'防水天幕遥控器', contract:700, date:'2026-01-07', paid:700, tax:null },
+  { id:'15.17', supplier:'无锡国固安全设备有限公司', item:'标识标牌', contract:1000, date:'2026-01-08', paid:1000, tax:null },
+];
+
+const usd25Projects = [
+  { no:1, proj:'24-038', contract:'23039-00101 / CO1', amount:28734.27, status:'完结', received:28722.27 },
+  { no:2, proj:'24-038', contract:'EQ005-00462 / CO1-CO8', amount:148538.25, status:'完结', received:148736.07 },
+  { no:3, proj:'24-046', contract:'17086-00031', amount:8645.6, status:'完结', received:8630.6 },
+  { no:4, proj:'24-050', contract:'22067-04374', amount:8599.31, status:'完结', received:8584.31 },
+  { no:5, proj:'25-001', contract:'22067-04292 / CO1-CO10', amount:267413.96, status:'完结', received:267416.39 },
+  { no:6, proj:'25-004', contract:'MA-022-0076', amount:5276.94, status:'完结', received:5261.94 },
+  { no:7, proj:'25-008', contract:'EQ001-01802 / CO1-CO2', amount:92324.73, status:'完结', received:93225.73 },
+  { no:8, proj:'25-023', contract:'22095-03415', amount:3201.7, status:'完结', received:3189.7 },
+  { no:9, proj:'25-024', contract:'25003-00140', amount:26385.24, status:'进行中', received:0 },
+  { no:10, proj:'24-017', contract:'24997-00009', amount:143124.43, status:'完结', received:143084.43 },
+  { no:11, proj:'25-019', contract:'25025-00005', amount:152168.94, status:'进行中', received:152128.94 },
+  { no:12, proj:'24-036', contract:'EQ003-03732', amount:647463.13, status:'完结', received:647413.13 },
+  { no:13, proj:'25-034', contract:'EQ-001-0003 / CO1-CO3', amount:133340.2, status:'完结', received:133300.2 },
+  { no:14, proj:'25-035', contract:'EQ-005-0015 / CO1-CO3', amount:181511.57, status:'完结', received:181486.57 },
+  { no:15, proj:'25-036', contract:'22-067-0093 / CO1-CO3', amount:74177, status:'进行中', received:74156.99 },
+];
+
+const cny25ProjMap = {'1':0,'2':1,'3':2,'5':4,'6':5,'7':6,'8':7,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14};
+
+const proj26List = [
+  { key:'26-005', name:'26-005', contract:'TK-002-0006', usdAmount:70884.23, usdReceived:0, status:'进行中', usdPayments:[] },
+  { key:'26-008', name:'26-008', contract:'23-088-0216', usdAmount:125490, usdReceived:94537.92, status:'进行中', usdPayments:[
+    {date:'2026-01-15', amt:62725, note:'预付款'},
+    {date:'2026-03-04', amt:-17512.11, note:'海运费'},
+    {date:'2026-03-06', amt:-5365.93, note:'目的港税费'},
+    {date:'2026-03-19', amt:-7134.04, note:'目的港税费'},
+    {date:'2026-04-01', amt:-825, note:'Detention'},
+    {date:'2026-04-08', amt:62725, note:'尾款'},
+  ]},
+  { key:'26-015', name:'26-015', contract:'EQ-005-0240', usdAmount:62042.89, usdReceived:62022.89, status:'进行中', usdPayments:[{date:'2026-04-14', amt:62022.89, note:''}] },
+  { key:'26-016', name:'26-016', contract:'EQ-001-0262 / CO1-CO3', usdAmount:102848.79, usdReceived:86946.07, status:'进行中', usdPayments:[{date:'2026-05-18', amt:86946.07, note:''}] },
+  { key:'26-024', name:'26-024', contract:'22-067-0619', usdAmount:253839.26, usdReceived:122583.82, status:'进行中', usdPayments:[{date:'2026-05-28', amt:122583.82, note:''}] },
+];
+
+// ─── HELPERS ────────────────────────────────────────────────────
+function fmtCny(n) {
+  if (n == null) return '—';
+  return '¥' + Number(n).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:1});
+}
+function fmtUsd(n) { return '$' + Number(n).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+
+function statusBadge(s) {
+  return s==='完结'
+    ? '<span class="badge badge-done">完结</span>'
+    : '<span class="badge badge-active">进行中</span>';
+}
+
+function getProjKey26(id) {
+  if (id.startsWith('HKG26005')) return '26-005';
+  if (id.startsWith('HKG26008') || id.startsWith('N/A')) return '26-008';
+  if (id.startsWith('HKG26025')) return '26-015';
+  if (id.startsWith('HKG26026') || id.startsWith('HKG26016')) return '26-016';
+  if (id.startsWith('HKG26024')) return '26-024';
+  return null;
+}
+
+const activeProjFilter = { '26':null, '25':null };
+
+function getItemProjKey(yr, r) {
+  if (yr==='26') return getProjKey26(r.id);
+  const pf = r.id.split('.')[0].trim();
+  const idx = cny25ProjMap[pf];
+  return idx!==undefined ? usd25Projects[idx].proj : null;
+}
+
+// ─── TABLE RENDERING ───────────────────────────────────────────
+function renderCnyTable(tbodyId, data) {
+  const yr = tbodyId.replace('cny','');
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  const tabsEl = document.getElementById('tabs'+yr);
+  if (tabsEl && tabsEl.childElementCount===0) {
+    const projects = yr==='26' ? proj26List.map(p=>p.key) : [...new Set(usd25Projects.map(p=>p.proj))];
+    tabsEl.innerHTML = `<span class="proj-tab active" onclick="setCnyFilter('${yr}',null,this)">全部</span>`+
+      projects.map(p=>`<span class="proj-tab" onclick="setCnyFilter('${yr}','${p}',this)">${p}</span>`).join('');
+  }
+  let totC=0,totP=0,totT=0;
+  data.forEach(r=>{
+    const projKey = getItemProjKey(yr, r);
+    totC+=r.contract; totP+=r.paid; if(r.tax) totT+=r.tax;
+    const tr = document.createElement('tr');
+    tr.dataset.search=(r.supplier+r.item+r.id).toLowerCase();
+    tr.dataset.proj=projKey||'';
+    tr.innerHTML=`<td style="font-size:11px;color:var(--text-dim);white-space:nowrap;font-family:var(--mono)">${projKey||'—'}</td><td>${r.supplier}</td><td>${r.item}</td><td class="mono">${fmtCny(r.contract)}</td><td class="mono" style="color:var(--text-secondary)">${r.date}</td><td class="positive mono">${fmtCny(r.paid)}</td><td class="mono" style="color:var(--accent-amber)">${r.tax!=null?fmtCny(r.tax):'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+  const totRow = document.createElement('tr');
+  totRow.className='total-row';
+  totRow.innerHTML=`<td colspan="3">合计</td><td class="mono">${fmtCny(totC)}</td><td></td><td class="mono">${fmtCny(totP)}</td><td class="mono">${fmtCny(totT)}</td>`;
+  tbody.appendChild(totRow);
+}
+
+function setCnyFilter(yr, projKey, btn) {
+  activeProjFilter[yr]=projKey;
+  document.getElementById('tabs'+yr).querySelectorAll('.proj-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const se=document.getElementById('search'+yr); if(se) se.value='';
+  applyFilters(yr,'');
+}
+
+function filterCnyTable(yr, q) {
+  activeProjFilter[yr]=null;
+  const tabs=document.getElementById('tabs'+yr);
+  if(tabs){tabs.querySelectorAll('.proj-tab').forEach(t=>t.classList.remove('active'));tabs.querySelector('.proj-tab').classList.add('active');}
+  applyFilters(yr,q);
+}
+
+function applyFilters(yr, searchQ) {
+  const tbody=document.getElementById('cny'+yr);
+  const q=searchQ!==undefined?searchQ:((document.getElementById('search'+yr)||{}).value||'');
+  const proj=activeProjFilter[yr];
+  const data=yr==='26'?cny26Data:cny25Data;
+  let visC=0,visP=0,visT=0;
+  tbody.querySelectorAll('tr:not(.total-row)').forEach(row=>{
+    const ms=!q||row.dataset.search.includes(q.toLowerCase());
+    const mp=!proj||row.dataset.proj===proj;
+    row.style.display=(ms&&mp)?'':'none';
+  });
+  data.forEach(r=>{
+    const projKey=getItemProjKey(yr,r);
+    const ms=!q||(r.supplier+r.item+r.id).toLowerCase().includes(q.toLowerCase());
+    const mp=!proj||projKey===proj;
+    if(ms&&mp){visC+=r.contract;visP+=r.paid;if(r.tax)visT+=r.tax;}
+  });
+  const totRow=tbody.querySelector('.total-row');
+  if(totRow) totRow.innerHTML=`<td colspan="3">${proj?proj+' 小计':'合计'}</td><td class="mono">${fmtCny(visC)}</td><td></td><td class="mono">${fmtCny(visP)}</td><td class="mono">${fmtCny(visT)}</td>`;
+}
+
+function renderUsd25() {
+  const tbody=document.getElementById('usd25');
+  usd25Projects.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.className='project-row';
+    tr.innerHTML=`<td class="mono">${r.no}</td><td class="mono">${r.proj}</td><td style="font-size:11px;color:var(--text-secondary);font-family:var(--mono)">${r.contract}</td><td class="mono">${fmtUsd(r.amount)}</td><td>${statusBadge(r.status)}</td><td class="${r.received>0?'positive':''} mono">${r.received>0?'+'+fmtUsd(r.received):'—'}</td><td></td>`;
+    tbody.appendChild(tr);
+  });
+  const tr=document.createElement('tr');
+  tr.style='background:rgba(59,130,246,0.12);font-weight:700';
+  const totAmt=usd25Projects.reduce((s,r)=>s+r.amount,0);
+  const totRec=usd25Projects.reduce((s,r)=>s+r.received,0);
+  tr.innerHTML=`<td colspan="3" class="highlight-blue">合计（15个项目）</td><td class="mono highlight-blue">${fmtUsd(totAmt)}</td><td></td><td class="positive mono">+${fmtUsd(totRec)}</td><td></td>`;
+  tbody.appendChild(tr);
+}
+
+// ─── PROJECT LIST ───────────────────────────────────────────────
+function renderProjList(year) {
+  const listEl=document.getElementById(year+'-proj-list');
+  const detailEl=document.getElementById(year+'-proj-detail');
+  listEl.style.display='';
+  detailEl.style.display='none';
+  if (year==='2026') {
+    const totalCny={};
+    cny26Data.forEach(r=>{
+      const k=getProjKey26(r.id); if(!k) return;
+      if(!totalCny[k]) totalCny[k]={cost:0,tax:0};
+      totalCny[k].cost+=r.paid;
+      if(r.tax) totalCny[k].tax+=r.tax;
+    });
+    listEl.innerHTML='<div class="proj-grid">'+proj26List.map(p=>{
+      const cny=totalCny[p.key]||{cost:0,tax:0};
+      const profit=p.usdReceived*6.8-cny.cost+cny.tax;
+      return `<div class="proj-card" onclick="showProjDetail('2026','${p.key}')">
+        <div class="pno">项目编号</div>
+        <div class="pname">${p.name}</div>
+        <div class="pamount">${fmtUsd(p.usdAmount)}</div>
+        <div class="pinfo">已收 ${fmtUsd(p.usdReceived)}</div>
+        <div class="pinfo cost">采购 ${fmtCny(cny.cost)}</div>
+        <div class="pstatus">${statusBadge(p.status)}</div>
+      </div>`;
+    }).join('')+'</div>';
+  } else {
+    const totalCny25={};
+    cny25Data.forEach(r=>{
+      const prefix=r.id.split('.')[0].trim();
+      const projIdx=cny25ProjMap[prefix];
+      if(projIdx===undefined) return;
+      const k=usd25Projects[projIdx].proj;
+      if(!totalCny25[k]) totalCny25[k]={cost:0,tax:0};
+      totalCny25[k].cost+=r.paid;
+      if(r.tax) totalCny25[k].tax+=r.tax;
+    });
+    listEl.innerHTML='<div class="proj-grid">'+usd25Projects.map(p=>{
+      const cny=totalCny25[p.proj]||{cost:0,tax:0};
+      return `<div class="proj-card" onclick="showProjDetail('2025','${p.proj}')">
+        <div class="pno">NO.${p.no} · ${p.proj}</div>
+        <div class="pname">${p.proj}</div>
+        <div class="pamount">${fmtUsd(p.amount)}</div>
+        <div class="pinfo">已收 ${p.received>0?fmtUsd(p.received):'—'}</div>
+        <div class="pinfo cost">采购 ${cny.cost>0?fmtCny(cny.cost):'—'}</div>
+        <div class="pstatus">${statusBadge(p.status)}</div>
+      </div>`;
+    }).join('')+'</div>';
+  }
+}
+
+function showProjDetail(year, projKey) {
+  const listEl=document.getElementById(year+'-proj-list');
+  const detailEl=document.getElementById(year+'-proj-detail');
+  if(year==='2026') {
+    const p=proj26List.find(x=>x.key===projKey);
+    const items=cny26Data.filter(r=>getProjKey26(r.id)===projKey);
+    const totalCost=items.reduce((s,r)=>s+r.paid,0);
+    const totalTax=items.reduce((s,r)=>s+(r.tax||0),0);
+    const exchanged=p.usdReceived*6.8;
+    const cashflow=exchanged-totalCost+totalTax;
+    detailEl.innerHTML=buildDetailHTML(year,p.name,p.contract,p.usdAmount,p.usdReceived,p.usdPayments,items,totalCost,totalTax,exchanged,cashflow,6.8,p.status);
+  } else {
+    const p=usd25Projects.find(x=>x.proj===projKey);
+    const cnyKeys=Object.entries(cny25ProjMap).filter(([k,v])=>v===usd25Projects.indexOf(p)).map(([k])=>k);
+    const items=cny25Data.filter(r=>{const pf=r.id.split('.')[0].trim();return cnyKeys.includes(pf);});
+    const totalCost=items.reduce((s,r)=>s+r.paid,0);
+    const totalTax=items.reduce((s,r)=>s+(r.tax||0),0);
+    const exchanged=p.received*7.0;
+    const cashflow=exchanged-totalCost+totalTax;
+    detailEl.innerHTML=buildDetailHTML(year,p.proj,p.contract,p.amount,p.received,[],items,totalCost,totalTax,exchanged,cashflow,7.0,p.status);
+  }
+  listEl.style.display='none';
+  detailEl.style.display='block';
+}
+
+function buildDetailHTML(year,name,contract,usdAmt,usdRec,usdPayments,cnyItems,totalCost,totalTax,exchanged,cashflow,rate,status) {
+  const cfColor=cashflow>=0?'var(--accent-green-light)':'#f87171';
+  const usdRows=usdPayments.length>0
+    ?`<div class="section" style="margin-top:16px">
+        <h3><span class="section-icon">$</span> 美金收付记录 <span class="tag usd">USD</span></h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>日期</th><th>金额 ($)</th><th>备注</th></tr></thead>
+          <tbody>${usdPayments.map(p=>`<tr><td class="mono">${p.date}</td><td class="${p.amt<0?'negative':'positive'} mono">${p.amt>0?'+':''}${fmtUsd(p.amt)}</td><td>${p.note}</td></tr>`).join('')}</tbody>
+        </table></div>
+      </div>`:'' ;
+  const cnyRows=cnyItems.length>0
+    ?`<div class="section" style="margin-top:16px">
+        <h3><span class="section-icon">¥</span> 人民币采购明细 <span class="tag cny">CNY</span></h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>编号</th><th>供应商</th><th>品名</th><th>合同金额 (¥)</th><th>付款日期</th><th>付款金额 (¥)</th><th>退税 (¥)</th></tr></thead>
+          <tbody>
+            ${cnyItems.map(r=>`<tr><td style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">${r.id}</td><td>${r.supplier}</td><td>${r.item}</td><td class="mono">${fmtCny(r.contract)}</td><td class="mono" style="color:var(--text-secondary)">${r.date}</td><td class="positive mono">${fmtCny(r.paid)}</td><td class="mono" style="color:var(--accent-amber)">${r.tax!=null?fmtCny(r.tax):'—'}</td></tr>`).join('')}
+            <tr style="background:rgba(59,130,246,0.08);font-weight:700"><td colspan="5" class="highlight-blue">小计</td><td class="positive mono">${fmtCny(totalCost)}</td><td class="mono" style="color:var(--accent-amber)">${fmtCny(totalTax)}</td></tr>
+          </tbody>
+        </table></div>
+      </div>`:'<div class="section" style="margin-top:16px;text-align:center;padding:30px 20px;color:var(--text-dim)">暂无人民币采购记录</div>';
+  return `
+    <div class="proj-detail">
+      <div class="proj-detail-header">
+        <div>
+          <h3>⊞ ${name} &nbsp;${statusBadge(status)}</h3>
+          <div class="proj-meta">合同编号：${contract}</div>
+        </div>
+        <button class="proj-back" onclick="renderProjList('${year}')">← 返回列表</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+        <div class="proj-stat"><div class="lbl">合同金额</div><div class="val" style="color:var(--accent-blue-light)">${fmtUsd(usdAmt)}</div></div>
+        <div class="proj-stat"><div class="lbl">已收美金</div><div class="val" style="color:var(--accent-green-light)">${usdRec>0?fmtUsd(usdRec):'—'}</div></div>
+        <div class="proj-stat"><div class="lbl">换汇(×${rate})</div><div class="val" style="color:var(--accent-amber)">${exchanged>0?fmtCny(exchanged):'—'}</div></div>
+        <div class="proj-stat"><div class="lbl">采购成本</div><div class="val" style="color:#f87171">${fmtCny(totalCost)}</div></div>
+        <div class="proj-stat"><div class="lbl">退税金额</div><div class="val" style="color:var(--accent-green-light)">${fmtCny(totalTax)}</div></div>
+        <div class="proj-stat"><div class="lbl">毛利 / 现金流</div><div class="val" style="color:${cfColor}">${fmtCny(cashflow)}</div></div>
+      </div>
+      ${usdRows}${cnyRows}
+    </div>`;
+}
+
+// ─── NAVIGATION ────────────────────────────────────────────────
+let currentYear='2025';
+let currentPageIdx=0;
+
+function switchYear(year, btn) {
+  document.querySelectorAll('.year-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.year-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('year-'+year).classList.add('active');
+  currentYear=year;
+  document.getElementById('main-nav').style.display=year==='compare'?'none':'flex';
+  if(year!=='compare'){
+    showPageByIdx(currentPageIdx);
+    if(currentPageIdx===4) renderProjList(year);
+  }
+}
+
+function showPage(event) {
+  const btns=Array.from(document.querySelectorAll('#main-nav button'));
+  btns.forEach(b=>b.classList.remove('active'));
+  event.target.closest('button').classList.add('active');
+  const idx=btns.indexOf(event.target.closest('button'));
+  currentPageIdx=idx;
+  showPageByIdx(idx);
+}
+
+function showPageByIdx(idx) {
+  ['2025','2026'].forEach(y=>{
+    const yc=document.getElementById('year-'+y);
+    if(!yc) return;
+    yc.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const pg=document.getElementById(y+'-page'+idx);
+    if(idx===4&&pg&&y===currentYear) renderProjList(y);
+    if(idx===0&&pg) pg.classList.add('dashboard-page');
+    if(pg) pg.classList.add('active');
+  });
+}
+
+// ─── CHARTS ────────────────────────────────────────────────────
+// 性冷淡风配色 — 低饱和度，统一色调
+const COLORS = {
+  blue:  ['#2d4a6b','#3d5f80','#4d7499','#5c87ae','#7aa3c8'],
+  green: '#3d6858',
+  greenLight: '#5c8a7a',
+  amber: '#7a6340',
+  red:   '#6e4040',
+  purple:'#5a4a78',
+  cyan:  '#2e6475',
+};
+
+const chartDefaults = {
+  font: { family:"'DM Mono', 'Noto Sans SC', sans-serif" },
+  color: '#8899bb',
+};
+
+Chart.register(ChartDataLabels);
+Chart.defaults.color = '#5c6680';
+Chart.defaults.font.family = "'DM Mono', 'Noto Sans SC', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
+Chart.defaults.plugins.tooltip = {
+  backgroundColor: '#191c26',
+  borderColor: 'rgba(92,127,163,0.2)',
+  borderWidth: 1,
+  titleColor: '#c9d0de',
+  bodyColor: '#5c6680',
+  padding: 12,
+  cornerRadius: 6,
+};
+
+let chartsInit=false;
+function initCharts() {
+  if(chartsInit) return;
+  chartsInit=true;
+
+  // 标签居中，白色大字，清晰可读
+  const dlBar  = { anchor:'center', align:'center', color:'rgba(255,255,255,0.9)', font:{size:12,weight:'600'} };
+  const dlBarY = { anchor:'center', align:'center', color:'rgba(255,255,255,0.9)', font:{size:12,weight:'600'} };
+  const dlLine = { anchor:'center', align:'top', offset:8, color:'#7aa3c8', font:{size:12,weight:'600'},
+    formatter:v=>v>0?'¥'+(v/10000).toFixed(0)+'万':'' };
+  const dlCmp  = { anchor:'center', align:'center', color:'rgba(255,255,255,0.9)', font:{size:14,weight:'600'} };
+
+  // ── 2026 ──
+  new Chart(document.getElementById('c26-proj'),{
+    type:'bar',
+    data:{labels:['26-005','26-008','26-015','26-016','26-024'],
+      datasets:[{label:'合同金额($)', data:[70884,125490,62043,102849,253839],
+        backgroundColor:COLORS.blue, borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30,right:4}},
+      plugins:{legend:{display:false},datalabels:{...dlBar,formatter:v=>'$'+(v/1000).toFixed(0)+'k'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+  new Chart(document.getElementById('c26-cash'),{
+    type:'doughnut',
+    data:{labels:['采购成本','退税','现金余额'],
+      datasets:[{data:[2111800,84215,462342],backgroundColor:[COLORS.red,COLORS.green,COLORS.purple],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>'¥'+c.parsed.toLocaleString()}},
+        datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v,ctx)=>ctx.chart.data.labels[ctx.dataIndex]+'\n¥'+(v/10000).toFixed(0)+'万'}}}
+  });
+  const cny26ByCost={};
+  cny26Data.forEach(r=>{const k=getProjKey26(r.id);if(k)cny26ByCost[k]=(cny26ByCost[k]||0)+r.paid;});
+  new Chart(document.getElementById('c26-proj-cny'),{
+    type:'doughnut',
+    data:{labels:Object.keys(cny26ByCost),datasets:[{data:Object.values(cny26ByCost),backgroundColor:COLORS.blue,borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:8,padding:10}},
+        tooltip:{callbacks:{label:c=>'¥'+c.parsed.toLocaleString()}},
+        datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v,ctx)=>{const tot=Object.values(cny26ByCost).reduce((a,b)=>a+b,0);const pct=Math.round(v/tot*100);return pct>5?ctx.chart.data.labels[ctx.dataIndex]+'\n'+pct+'%':''}}}}
+  });
+  const s26=[...cny26Data].sort((a,b)=>b.paid-a.paid).slice(0,8);
+  new Chart(document.getElementById('c26-sup'),{
+    type:'bar',
+    data:{labels:s26.map(r=>r.supplier.length>9?r.supplier.slice(0,9)+'…':r.supplier),
+      datasets:[{label:'付款(¥)', data:s26.map(r=>r.paid), backgroundColor:COLORS.greenLight, borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:60}},
+      plugins:{legend:{display:false},datalabels:{...dlBarY,formatter:v=>'¥'+(v/10000).toFixed(0)+'万'}},
+      scales:{x:{grid:{display:false},ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}},y:{grid:{display:false}}}}
+  });
+  const m26={'1月':0,'2月':0,'3月':0,'4月':0,'5月':0};
+  cny26Data.forEach(r=>{const m=parseInt(r.date.split('-')[1]);const k=m+'月';if(m26[k]!==undefined)m26[k]+=r.paid;});
+  new Chart(document.getElementById('c26-month'),{
+    type:'line',
+    data:{labels:Object.keys(m26),datasets:[{label:'付款(¥)', data:Object.values(m26),
+      borderColor:COLORS.cyan, backgroundColor:'rgba(6,182,212,0.08)', borderWidth:2,
+      fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:COLORS.cyan}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30}},
+      plugins:{legend:{display:false},datalabels:dlLine},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  const c26UsdRec=proj26List.reduce((s,p)=>s+p.usdReceived,0);
+  const c26UsdTot=proj26List.reduce((s,p)=>s+p.usdAmount,0);
+  new Chart(document.getElementById('c26-usd-prog'),{
+    type:'doughnut',
+    data:{labels:['已收','待收'],datasets:[{data:[c26UsdRec,Math.max(0,c26UsdTot-c26UsdRec)],backgroundColor:[COLORS.green,'rgba(255,255,255,0.07)'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>'$'+c.parsed.toLocaleString()}},
+        datalabels:{color:['#fff','#8899bb'],font:{size:11,weight:'700'},formatter:(v,ctx)=>{const tot=c26UsdTot;const pct=Math.round(v/tot*100);return pct>5?ctx.chart.data.labels[ctx.dataIndex]+'\n'+pct+'%':''}}}}
+  });
+
+  // ── 2025 ──
+  new Chart(document.getElementById('c25-proj'),{
+    type:'bar',
+    data:{labels:usd25Projects.map(r=>r.proj),
+      datasets:[{label:'合同($)', data:usd25Projects.map(r=>r.amount),
+        backgroundColor:usd25Projects.map((_,i)=>`hsl(${215+i*4},65%,${58-i*1.5}%)`), borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},
+      plugins:{legend:{display:false},datalabels:{...dlBar,formatter:v=>v>=10000?'$'+(v/1000).toFixed(0)+'k':''}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+  new Chart(document.getElementById('c25-cash'),{
+    type:'doughnut',
+    data:{labels:['采购成本','退税','结余'],
+      datasets:[{data:[9509325,1093993,4881445],backgroundColor:[COLORS.red,COLORS.green,COLORS.purple],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>'¥'+c.parsed.toLocaleString()}},
+        datalabels:{color:'#fff',font:{size:11,weight:'700'},formatter:(v,ctx)=>ctx.chart.data.labels[ctx.dataIndex]+'\n¥'+(v/10000).toFixed(0)+'万'}}}
+  });
+  const cny25ByCost={};
+  cny25Data.forEach(r=>{
+    const pf=r.id.split('.')[0].trim();
+    const idx=cny25ProjMap[pf];
+    if(idx!==undefined){const k=usd25Projects[idx].proj;cny25ByCost[k]=(cny25ByCost[k]||0)+r.paid;}
+  });
+  new Chart(document.getElementById('c25-proj-cny'),{
+    type:'doughnut',
+    data:{labels:Object.keys(cny25ByCost),datasets:[{data:Object.values(cny25ByCost),backgroundColor:Object.keys(cny25ByCost).map((_,i)=>`hsl(${200+i*12},55%,${50-i*0.5}%)`),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:6,padding:8}},
+        tooltip:{callbacks:{label:c=>'¥'+c.parsed.toLocaleString()}},
+        datalabels:{color:'#fff',font:{size:9,weight:'700'},formatter:(v,ctx)=>{const tot=Object.values(cny25ByCost).reduce((a,b)=>a+b,0);const pct=Math.round(v/tot*100);return pct>4?ctx.chart.data.labels[ctx.dataIndex]+'\n'+pct+'%':''}}}}
+  });
+  const s25=[...cny25Data].sort((a,b)=>b.paid-a.paid).slice(0,8);
+  new Chart(document.getElementById('c25-sup'),{
+    type:'bar',
+    data:{labels:s25.map(r=>r.supplier.length>9?r.supplier.slice(0,9)+'…':r.supplier),
+      datasets:[{label:'付款(¥)', data:s25.map(r=>r.paid), backgroundColor:'#60a5fa', borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:70}},
+      plugins:{legend:{display:false},datalabels:{...dlBarY,formatter:v=>'¥'+(v/10000).toFixed(0)+'万'}},
+      scales:{x:{grid:{display:false},ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}},y:{grid:{display:false}}}}
+  });
+  const m25={'1月':0,'2月':0,'3月':0,'4月':0,'5月':0,'6月':0,'7月':0,'8月':0,'9月':0,'10月':0,'11月':0,'12月':0};
+  cny25Data.forEach(r=>{
+    const yr=r.date.split('-')[0]; if(yr!=='2025') return;
+    const m=parseInt(r.date.split('-')[1]); const k=m+'月'; if(m25[k]!==undefined)m25[k]+=r.paid;
+  });
+  new Chart(document.getElementById('c25-month'),{
+    type:'line',
+    data:{labels:Object.keys(m25),datasets:[{label:'付款(¥)', data:Object.values(m25),
+      borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', borderWidth:2,
+      fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#3b82f6'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},
+      plugins:{legend:{display:false},datalabels:{...dlLine,color:'#60a5fa'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  const c25UsdRec=usd25Projects.reduce((s,p)=>s+p.received,0);
+  const c25UsdTot=usd25Projects.reduce((s,p)=>s+p.amount,0);
+  new Chart(document.getElementById('c25-usd-prog'),{
+    type:'doughnut',
+    data:{labels:['已收','待收'],datasets:[{data:[c25UsdRec,Math.max(0,c25UsdTot-c25UsdRec)],backgroundColor:[COLORS.green,'rgba(255,255,255,0.07)'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>'$'+c.parsed.toLocaleString()}},
+        datalabels:{color:['#fff','#8899bb'],font:{size:11,weight:'700'},formatter:(v,ctx)=>{const pct=Math.round(v/c25UsdTot*100);return pct>5?ctx.chart.data.labels[ctx.dataIndex]+'\n'+pct+'%':''}}}}
+  });
+
+  // ── COMPARE ──
+  new Chart(document.getElementById('cmp-usd'),{
+    type:'bar',
+    data:{labels:['2025 全年','2026 (截至5月)'],
+      datasets:[{label:'美金收入', data:[1896038,366166], backgroundColor:['#1d4ed8','#60a5fa'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>'$'+(v/10000).toFixed(0)+'万'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  new Chart(document.getElementById('cmp-margin'),{
+    type:'bar',
+    data:{labels:['2025 全年','2026 预测'],
+      datasets:[{label:'毛利率', data:[36.7,34.5], backgroundColor:['#059669','#34d399'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dl
