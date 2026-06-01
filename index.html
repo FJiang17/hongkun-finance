@@ -1364,4 +1364,89 @@ function initCharts() {
   });
   new Chart(document.getElementById('c25-month'),{
     type:'line',
-    data:{labels:Object.keys(m25),datasets:[{label:'付款(¥)', data:Object.values(m
+    data:{labels:Object.keys(m25),datasets:[{label:'付款(¥)', data:Object.values(m25),
+      borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', borderWidth:2,
+      fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#3b82f6'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},
+      plugins:{legend:{display:false},datalabels:{...dlLine,color:'#60a5fa'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  const c25UsdRec=usd25Projects.reduce((s,p)=>s+p.received,0);
+  const c25UsdTot=usd25Projects.reduce((s,p)=>s+p.amount,0);
+  new Chart(document.getElementById('c25-usd-prog'),{
+    type:'doughnut',
+    data:{labels:['已收','待收'],datasets:[{data:[c25UsdRec,Math.max(0,c25UsdTot-c25UsdRec)],backgroundColor:[COLORS.green,'rgba(255,255,255,0.07)'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>'$'+c.parsed.toLocaleString()}},
+        datalabels:{color:['#fff','#8899bb'],font:{size:11,weight:'700'},formatter:(v,ctx)=>{const pct=Math.round(v/c25UsdTot*100);return pct>5?ctx.chart.data.labels[ctx.dataIndex]+'\n'+pct+'%':''}}}}
+  });
+
+  // ── COMPARE ──
+  new Chart(document.getElementById('cmp-usd'),{
+    type:'bar',
+    data:{labels:['2025 全年','2026 (截至5月)'],
+      datasets:[{label:'美金收入', data:[1896038,366166], backgroundColor:['#1d4ed8','#60a5fa'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>'$'+(v/10000).toFixed(0)+'万'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  new Chart(document.getElementById('cmp-margin'),{
+    type:'bar',
+    data:{labels:['2025 全年','2026 预测'],
+      datasets:[{label:'毛利率', data:[36.7,34.5], backgroundColor:['#059669','#34d399'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>v+'%'}},
+      scales:{x:{grid:{display:false}},y:{max:55,ticks:{callback:v=>v+'%'}}}}
+  });
+  new Chart(document.getElementById('cmp-cost'),{
+    type:'bar',
+    data:{labels:['2025 换汇','2025 成本','2026 换汇','2026 成本'],
+      datasets:[{label:'金额(¥)', data:[13296777,9509325,2489927,2111800], backgroundColor:['#2563eb','#ef4444','#60a5fa','#f87171'], borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>'¥'+(v/10000).toFixed(0)+'万'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  new Chart(document.getElementById('cmp-tax'),{
+    type:'bar',
+    data:{labels:['2025 退税','2026 退税'],
+      datasets:[{label:'退税(¥)', data:[1093993,84215], backgroundColor:['#059669','#34d399'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>'¥'+(v/10000).toFixed(1)+'万'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+}
+
+window.addEventListener('load', ()=>{
+  renderCnyTable('cny26', cny26Data);
+  renderCnyTable('cny25', cny25Data);
+  renderUsd25();
+  initCharts();
+});
+</script>
+<script>
+(function(){
+  const PW = '603807';
+  const gate = document.getElementById('pw-gate');
+  const input = document.getElementById('pw-input');
+  const err = document.getElementById('pw-err');
+
+  // 每次打开页面都需要输入密码（不记住认证状态）
+  function tryUnlock() {
+    if (input.value === PW) {
+      gate.style.opacity='0';
+      gate.style.transition='opacity 0.4s ease';
+      setTimeout(()=>{ gate.style.display='none'; },400);
+    } else {
+      err.style.display='block';
+      input.classList.add('error');
+      input.value='';
+      setTimeout(()=>{ input.classList.remove('error'); err.style.display='none'; },1200);
+    }
+  }
+  // 自动 focus，确保用户直接能输入
+  setTimeout(()=>input.focus(), 100);
+  // 按确认按钮、回车、或输满6位都触发
+  document.getElementById('pw-btn').addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+  input.addEventListener('input', ()=>{ if(input.value.length >= 6) tryUnlock(); });
+})();
+</script>
+</body>
+</html>
