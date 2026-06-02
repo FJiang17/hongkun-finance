@@ -492,7 +492,10 @@ tr:hover td { background:rgba(255,255,255,0.025); }
     <div id="pw-logo">鸿</div>
     <div id="pw-title">北京鸿坤进出口</div>
     <div id="pw-sub">请输入访问密码</div>
-    <div id="pw-input-wrap"></div>
+    <!-- 假字段吸收浏览器自动填充，真字段保持空 -->
+    <input type="text" style="display:none" aria-hidden="true">
+    <input type="password" style="display:none" aria-hidden="true">
+    <input id="pw-input" type="password" maxlength="20" placeholder="请输入密码" autocomplete="new-password">
     <button id="pw-btn">确认</button>
     <div id="pw-err">密码错误，请重试</div>
   </div>
@@ -1453,4 +1456,93 @@ window.addEventListener('load', ()=>{
 </html>
 25),
       borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', borderWidth:2,
-      fill:t
+      fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#3b82f6'}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30}},
+      plugins:{legend:{display:false},datalabels:{...dlLine,color:'#60a5fa'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  const c25UsdRec=usd25Projects.reduce((s,p)=>s+p.received,0);
+  const c25UsdTot=usd25Projects.reduce((s,p)=>s+p.amount,0);
+  new Chart(document.getElementById('c25-usd-prog'),{
+    type:'doughnut',
+    data:{labels:['已收','待收'],datasets:[{data:[c25UsdRec,Math.max(0,c25UsdTot-c25UsdRec)],backgroundColor:[COLORS.green,'rgba(255,255,255,0.07)'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>'$'+c.parsed.toLocaleString()}},
+        datalabels:{color:['#fff','#8899bb'],font:{size:11,weight:'700'},formatter:(v,ctx)=>{const pct=Math.round(v/c25UsdTot*100);return pct>5?ctx.chart.data.labels[ctx.dataIndex]+'\n'+pct+'%':''}}}}
+  });
+
+  // ── COMPARE ──
+  const dlCmp  = { anchor:'center', align:'center', color:'rgba(255,255,255,0.9)', font:{size:14,weight:'600'} };
+  new Chart(document.getElementById('cmp-usd'),{
+    type:'bar',
+    data:{labels:['2025 全年','2026 (截至5月)'],
+      datasets:[{label:'美金收入', data:[1896038,366166], backgroundColor:['#2d4a6b','#5c87ae'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>'$'+(v/10000).toFixed(0)+'万'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  new Chart(document.getElementById('cmp-margin'),{
+    type:'bar',
+    data:{labels:['2025 全年','2026 预测'],
+      datasets:[{label:'毛利率', data:[36.7,34.5], backgroundColor:['#3d6858','#5c8a7a'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>v+'%'}},
+      scales:{x:{grid:{display:false}},y:{max:55,ticks:{callback:v=>v+'%'}}}}
+  });
+  new Chart(document.getElementById('cmp-cost'),{
+    type:'bar',
+    data:{labels:['2025 换汇','2025 成本','2026 换汇','2026 成本'],
+      datasets:[{label:'金额(¥)', data:[13296777,9509325,2489927,2111800], backgroundColor:['#2d4a6b','#6e4040','#5c87ae','#7a5050'], borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>'¥'+(v/10000).toFixed(0)+'万'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+  new Chart(document.getElementById('cmp-tax'),{
+    type:'bar',
+    data:{labels:['2025 退税','2026 退税'],
+      datasets:[{label:'退税(¥)', data:[1093993,84215], backgroundColor:['#3d6858','#5c8a7a'], borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{...dlCmp,formatter:v=>'¥'+(v/10000).toFixed(1)+'万'}},
+      scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}
+  });
+}
+
+window.addEventListener('load', ()=>{
+  renderCnyTable('cny26', cny26Data);
+  renderCnyTable('cny25', cny25Data);
+  renderUsd25();
+  initCharts();
+});
+</script>
+<script>
+(function(){
+  const PW = '603807';
+  const gate = document.getElementById('pw-gate');
+  const input = document.getElementById('pw-input');
+  const err = document.getElementById('pw-err');
+
+  // 多次强制清空，确保自动填充的值被清除
+  input.value = '';
+  setTimeout(()=>{ input.value=''; input.focus(); }, 200);
+  setTimeout(()=>{ input.value=''; }, 800);
+
+  function tryUnlock() {
+    if (input.value === PW) {
+      gate.style.opacity='0';
+      gate.style.transition='opacity 0.4s ease';
+      setTimeout(()=>{ gate.style.display='none'; },400);
+    } else {
+      err.style.display='block';
+      input.classList.add('error');
+      input.value='';
+      setTimeout(()=>{ input.classList.remove('error'); err.style.display='none'; },1200);
+    }
+  }
+  document.getElementById('pw-btn').addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+  input.addEventListener('input', ()=>{ if(input.value.length >= 6) tryUnlock(); });
+})();
+</script>
+</body>
+</html>
+})();
+</script>
+</body>
+</html>
